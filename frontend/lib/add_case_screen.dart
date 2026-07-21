@@ -1,6 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class AddCaseScreen extends StatefulWidget {
   @override
@@ -8,54 +8,60 @@ class AddCaseScreen extends StatefulWidget {
 }
 
 class _AddCaseScreenState extends State<AddCaseScreen> {
-  final TextEditingController _numberController = TextEditingController();
-  final TextEditingController _clientController = TextEditingController();
-  final TextEditingController _descController = TextEditingController();
+  final _caseNumberController = TextEditingController();
+  final _clientNameController = TextEditingController();
+  final _detailsController = TextEditingController();
+  bool _isLoading = false;
 
   Future<void> _submitCase() async {
-    final url = Uri.parse('http://localhost:5000/api/cases/add');
-    
+    setState(() { _isLoading = true; });
+    final url = Uri.parse('https://law-firm-system-4ccx.onrender.com/api/cases');
+
     try {
       final response = await http.post(
         url,
-        headers: {"Content-Type": "application/json"},
-        body: json.encode({
-          "caseNumber": _numberController.text,
-          "clientName": _clientController.text,
-          "caseDescription": _descController.text,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'caseNumber': _caseNumberController.text,
+          'clientName': _clientNameController.text,
+          'details': _detailsController.text,
         }),
       );
 
-      if (mounted) { // Check if widget is still in the tree
-        if (response.statusCode == 201) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Case saved successfully!")));
-          _numberController.clear();
-          _clientController.clear();
-          _descController.clear();
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to save: ${response.statusCode}")));
-        }
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Case added successfully!')),
+        );
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to add case: ${response.body}')),
+        );
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: Could not connect to server")));
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error connecting to server: $e')),
+      );
+    } finally {
+      setState(() { _isLoading = false; });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Add New Case")),
+      appBar: AppBar(title: Text('Add New Case')),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(controller: _numberController, decoration: InputDecoration(labelText: "Case Number")),
-            TextField(controller: _clientController, decoration: InputDecoration(labelText: "Client Name")),
-            TextField(controller: _descController, decoration: InputDecoration(labelText: "Description")),
+            TextField(controller: _caseNumberController, decoration: InputDecoration(labelText: 'Case Number')),
+            TextField(controller: _clientNameController, decoration: InputDecoration(labelText: 'Client Name')),
+            TextField(controller: _detailsController, decoration: InputDecoration(labelText: 'Case Details')),
             SizedBox(height: 20),
-            ElevatedButton(onPressed: _submitCase, child: Text("Save Case")),
+            _isLoading
+                ? CircularProgressIndicator()
+                : ElevatedButton(onPressed: _submitCase, child: Text('Save Case')),
           ],
         ),
       ),
