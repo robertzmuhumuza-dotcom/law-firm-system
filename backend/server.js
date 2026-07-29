@@ -1,49 +1,43 @@
 const express = require('express');
-const router = express.Router();
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
+const cors = require('cors');
+require('dotenv').config();
 
-// Temporary in-memory or placeholder model integration if your User model is set up elsewhere
-// Make sure to require your actual User model if you have one, e.g.:
-// const User = require('../models/User');
+const app = express();
 
-// REGISTER Route (handles POST /api/auth/register)
-router.post('/register', async (req, res) => {
-    try {
-        const { name, email, password, role } = req.body;
+// Middleware
+app.use(cors());
+app.use(express.json());
 
-        if (!name || !email || !password) {
-            return res.status(400).json({ error: 'Please provide all required fields' });
-        }
+// Import Routes
+const authRoutes = require('./routes/auth');
+const caseRoutes = require('./routes/cases');
 
-        // Response confirming successful route hit and registration creation
-        // Note: integrate your database saving logic here (e.g., User.create(...))
-        return res.status(201).json({ 
-            message: 'Staff account created successfully',
-            user: { name, email, role: role || 'Associate' }
-        });
-    } catch (err) {
-        return res.status(500).json({ error: err.message });
-    }
+// Mount Routes explicitly
+app.use('/api/auth', authRoutes);
+app.use('/api/cases', caseRoutes);
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    res.status(200).json({ status: 'Online', message: 'Backend service is active' });
 });
 
-// LOGIN Route (handles POST /api/auth/login)
-router.post('/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-
-        if (!email || !password) {
-            return res.status(400).json({ error: 'Please provide email and password' });
-        }
-
-        // Response confirming successful login
-        return res.status(200).json({ 
-            message: 'Login successful',
-            token: 'sample-jwt-token-placeholder'
-        });
-    } catch (err) {
-        return res.status(500).json({ error: err.message });
-    }
+// Root fallback
+app.get('/', (req, res) => {
+    res.status(200).send('Law Firm Management System Backend is Live');
 });
 
-module.exports = router;
+// Database & Server Initialization
+const PORT = process.env.PORT || 5000;
+const MONGO_URI = process.env.MONGO_URI;
+
+mongoose.connect(MONGO_URI)
+.then(() => {
+    console.log('MongoDB Connected Successfully');
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+})
+.catch((err) => {
+    console.error('Database connection error:', err);
+});
