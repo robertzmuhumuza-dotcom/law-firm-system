@@ -13,7 +13,7 @@ app.use(express.json());
 const authRoutes = require('./routes/auth');
 const caseRoutes = require('./routes/cases');
 
-// Mount Routes explicitly
+// Mount Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/cases', caseRoutes);
 
