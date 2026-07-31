@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
-import 'auth_screen.dart';
+import 'screens/login_screen.dart';
 
 void main() {
-  runApp(LawFirmApp());
+  runApp(const LawFirmApp());
 }
 
 class LawFirmApp extends StatelessWidget {
+  const LawFirmApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Law Firm System',
+      title: 'Law Firm Management System',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        useMaterial3: true,
       ),
-      home: AuthScreen(),
+      home: const LoginScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
