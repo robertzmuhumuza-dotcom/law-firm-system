@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
 
@@ -8,14 +9,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Root route so visiting the Render URL doesn't show an error
+// Root route
 app.get('/', (req, res) => {
   res.send('Law Firm System Backend is Live!');
 });
 
-// Import Auth Routes
+// Import Auth and AI Routes
 const authRoutes = require('./routes/auth');
+const aiRoutes = require('./routes/aiRoutes');
+
 app.use('/api/auth', authRoutes);
+app.use('/api/ai', aiRoutes);
 
 const PORT = process.env.PORT || 5000;
 
