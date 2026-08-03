@@ -1,43 +1,36 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config();
 
+// Initialize Express app
 const app = express();
 
 // Middleware
-app.use(cors());
 app.use(express.json());
+app.use(cors());
 
-// Import Routes
-const aiRoutes = require('./routes/aiRoutes');
-const firmRoutes = require('./routes/firmRoutes');
-const authRoutes = require('./routes/auth'); // Matches auth.js
+// Import Authentication Routes
+const authRoutes = require('./routes/auth');
 
-// Mount Routes
-app.use('/api/ai', aiRoutes);
-app.use('/api/firm', firmRoutes);
-app.use('/api/auth', authRoutes); // This handles login and registration
+// Mount routes so they match '/api/auth/login', '/api/auth/register', and '/api/auth/forgot-password'
+app.use('/api/auth', authRoutes);
 
-// Root Endpoint
+// Root route test
 app.get('/', (req, res) => {
-  res.status(200).json({
-    status: 'online',
-    message: 'Law Firm Management System Backend is running smoothly.'
-  });
+  res.send('Law Firm System Backend is running live!');
 });
 
-// MongoDB Connection & Server Start
+// Database Connection & Server Startup
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI;
+const MONGO_URI = process.env.MONGO_URI || 'YOUR_MONGODB_CONNECTION_STRING';
 
 mongoose.connect(MONGO_URI)
   .then(() => {
-    console.log('Connected to MongoDB successfully.');
+    console.log('Connected to MongoDB successfully');
     app.listen(PORT, () => {
-      console.log(`Server is running live on port ${PORT}`);
+      console.log(`Server is running on port ${PORT}`);
     });
   })
-  .catch((error) => {
-    console.error('Database connection error:', error.message);
+  .catch((err) => {
+    console.error('Database connection error:', err);
   });

@@ -1,27 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'forgot_password_screen.dart'; // Correct import path inside the screens folder
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({Key? key}) : super(key: key);
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _ForgotPasswordScreenState createState() => _ForgotPasswordScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
-  Future<void> _loginUser() async {
+  Future<void> _resetPassword() async {
     final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
+    final newPassword = _passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
+    if (email.isEmpty || newPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter email and password.')),
+        const SnackBar(content: Text('Please fill in all fields.')),
       );
       return;
     }
@@ -29,22 +28,23 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Replace with your actual live Render backend URL
+      // Ensure the full path includes '/api/auth/forgot-password'
       final response = await http.post(
-        Uri.parse('https://YOUR-RENDER-URL.onrender.com/api/auth/login'),
+        Uri.parse('https://YOUR-RENDER-URL.onrender.com/api/auth/forgot-password'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'password': password}),
+        body: jsonEncode({'email': email, 'newPassword': newPassword}),
       );
 
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200 && data['success'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login successful!')),
+          SnackBar(content: Text(data['message'] ?? 'Password reset successful!')),
         );
+        Navigator.pop(context); // Go back to login screen
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? 'Invalid email or password.')),
+          SnackBar(content: Text(data['message'] ?? 'Failed to reset password.')),
         );
       }
     } catch (e) {
@@ -59,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Law Firm System - Login')),
+      appBar: AppBar(title: const Text('Reset Password')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -73,32 +73,18 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 16),
             TextField(
               controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
+              decoration: const InputDecoration(labelText: 'New Password'),
               obscureText: true,
             ),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _isLoading ? null : _loginUser,
+                onPressed: _isLoading ? null : _resetPassword,
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Login to Server'),
+                    : const Text('Update Password'),
               ),
-            ),
-            const SizedBox(height: 12),
-            
-            // Forgot Password Navigation (Fixed without 'const')
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ForgotPasswordScreen(),
-                  ),
-                );
-              },
-              child: const Text('Forgot Password?'),
             ),
           ],
         ),
