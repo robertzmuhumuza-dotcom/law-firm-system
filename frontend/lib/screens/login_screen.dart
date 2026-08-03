@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import 'dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -45,11 +46,22 @@ class _LoginScreenState extends State<LoginScreen> {
       _isSuccess = result['success'];
     });
 
-    if (_isSuccess && !_isRegistering) {
+    if (_isSuccess) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login Successful!')),
-      );
+
+      if (_isRegistering) {
+        // Switch back to login view after successful registration
+        setState(() {
+          _isRegistering = false;
+          _message = 'Registration successful! Please login.';
+        });
+      } else {
+        // Navigate to Dashboard on successful login
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const DashboardScreen()),
+        );
+      }
     }
   }
 

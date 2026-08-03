@@ -2,25 +2,23 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 
-// Endpoint for live legal reasoning, evidence evaluation, and law referencing
 router.post('/reason', async (req, res) => {
   try {
     const { prompt, contextType, caseDetails } = req.body;
+    const apiKey = process.env.GEMINI_API_KEY;
 
-    // Construct a robust system prompt tailored to Ugandan and International Law
+    if (!apiKey) {
+      console.error('CRITICAL: GEMINI_API_KEY is missing from environment variables.');
+      return res.status(500).json({ success: false, message: 'Server configuration error: API key missing.' });
+    }
+
     const systemPrompt = `
       You are an expert legal AI co-pilot integrated into a Ugandan Law Firm Management System.
-      Your expertise covers:
-      1. Ugandan Jurisprudence (Statutes, Acts, Constitution of Uganda, and precedents from ULII/Courts of Record like the Supreme Court, Court of Appeal, and High Court).
-      2. Comparative International Law and multi-jurisdictional frameworks.
-      3. Evidence evaluation, logical consistency checks, and identifying legal risks.
-
-      Always maintain analytical precision, cite relevant legal principles or hypothetical/real statutory context accurately, and evaluate evidence objectively.
+      Your expertise covers Ugandan Jurisprudence, statutory frameworks, and evidence evaluation.
     `;
 
-    // Call the Gemini API model
     const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         contents: [
           { 
@@ -39,8 +37,12 @@ router.post('/reason', async (req, res) => {
     res.status(200).json({ success: true, analysis: aiReply });
 
   } catch (error) {
-    console.error('AI Reasoning Error:', error.response?.data || error.message);
-    res.status(500).json({ success: false, message: 'Failed to generate legal analysis.' });
+    // This will print the full error details in your Render server logs
+    console.error('AI Reasoning Detailed Error:', error.response?.data || error.message);
+    res.status(500).json({ 
+      success: false, 
+      message: error.response?.data?.error?.message || 'Failed to generate legal analysis.' 
+    });
   }
 });
 
