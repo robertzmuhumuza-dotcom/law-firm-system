@@ -18,7 +18,7 @@ router.post('/reason', async (req, res) => {
     `;
 
     const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
         contents: [
           { 
@@ -37,7 +37,6 @@ router.post('/reason', async (req, res) => {
     res.status(200).json({ success: true, analysis: aiReply });
 
   } catch (error) {
-    // This will print the full error details in your Render server logs
     console.error('AI Reasoning Detailed Error:', error.response?.data || error.message);
     res.status(500).json({ 
       success: false, 
