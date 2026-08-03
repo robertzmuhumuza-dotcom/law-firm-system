@@ -23,7 +23,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Login Route
+// Login Route (Supports both hashed and plain-text passwords)
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -33,8 +33,11 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid email or password.' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
+    // Check if password matches via bcrypt OR if it's stored as plain text
+    const isBcryptMatch = await bcrypt.compare(password, user.password).catch(() => false);
+    const isPlainTextMatch = (password === user.password);
+
+    if (!isBcryptMatch && !isPlainTextMatch) {
       return res.status(400).json({ success: false, message: 'Invalid email or password.' });
     }
 
