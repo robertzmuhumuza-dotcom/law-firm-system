@@ -19,8 +19,10 @@ app.use('/api/firm', firmRoutes);
 
 // Root Endpoint
 app.get('/', (req, res) => {
-  status: 'online',
-  message: 'Law Firm Management System Backend is running smoothly.'
+  res.status(200).json({
+    status: 'online',
+    message: 'Law Firm Management System Backend is running smoothly.'
+  });
 });
 
 // MongoDB Connection & Server Start
