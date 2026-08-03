@@ -9,24 +9,31 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Root route
+// Import Routes
+const aiRoutes = require('./routes/aiRoutes');
+const firmRoutes = require('./routes/firmRoutes');
+
+// Mount Routes
+app.use('/api/ai', aiRoutes);
+app.use('/api/firm', firmRoutes);
+
+// Root Endpoint
 app.get('/', (req, res) => {
-  res.send('Law Firm System Backend is Live!');
+  status: 'online',
+  message: 'Law Firm Management System Backend is running smoothly.'
 });
 
-// Import Auth and AI Routes
-const authRoutes = require('./routes/auth');
-const aiRoutes = require('./routes/aiRoutes');
-
-app.use('/api/auth', authRoutes);
-app.use('/api/ai', aiRoutes);
-
+// MongoDB Connection & Server Start
 const PORT = process.env.PORT || 5000;
+const MONGO_URI = process.env.MONGO_URI;
 
-// Database Connection & Server Start
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(MONGO_URI)
   .then(() => {
-    console.log('MongoDB Connected Successfully');
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    console.log('Connected to MongoDB successfully.');
+    app.listen(PORT, () => {
+      console.log(`Server is running live on port ${PORT}`);
+    });
   })
-  .catch((err) => console.log('Database connection error: ', err));
+  .catch((error) => {
+    console.error('Database connection error:', error.message);
+  });
