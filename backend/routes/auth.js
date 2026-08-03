@@ -1,4 +1,4 @@
-Lconst express = require('express');
+const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
@@ -12,7 +12,6 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Email and password are required.' });
     }
 
-    // Check if user already exists
     const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
     if (existingUser) {
       return res.status(400).json({ success: false, message: 'This email is already registered.' });
@@ -29,7 +28,6 @@ router.post('/register', async (req, res) => {
 
     return res.status(201).json({ success: true, message: 'User registered successfully.' });
   } catch (error) {
-    // Catch duplicate key error code from MongoDB explicitly
     if (error.code === 11000) {
       return res.status(400).json({ success: false, message: 'This email is already registered in the system.' });
     }
@@ -37,7 +35,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Login Route (Supports both hashed and plain-text passwords)
+// Login Route
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
