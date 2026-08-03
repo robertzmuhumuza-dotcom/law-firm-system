@@ -3,23 +3,6 @@ const router = express.Router();
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 
-// Instant Browser Password Fixer (Visit this URL in your browser to reset password to 12345678)
-router.get('/fix-password', async (req, res) => {
-  try {
-    const user = await User.findOne({ email: 'robertzmuhumuza@gmail.com' });
-    if (!user) {
-      return res.status(404).send('User not found in database.');
-    }
-
-    user.password = await bcrypt.hash('12345678', 10);
-    await user.save();
-
-    return res.status(200).send('<h1>Success! Password has been reset to: 12345678</h1><p>You can now go back to your phone app and log in.</p>');
-  } catch (error) {
-    return res.status(500).send('Error: ' + error.message);
-  }
-});
-
 // Register Route
 router.post('/register', async (req, res) => {
   try {
@@ -83,6 +66,29 @@ router.post('/login', async (req, res) => {
         name: user.name || 'User'
       }
     });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Forgot Password Route
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    if (!email || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Email and new password are required.' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User account not found with this email.' });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    return res.status(200).json({ success: true, message: 'Password updated successfully. You can now log in.' });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
