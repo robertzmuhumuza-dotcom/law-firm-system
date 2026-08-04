@@ -2,23 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class ForgotPasswordScreen extends StatefulWidget {
-  const ForgotPasswordScreen({Key? key}) : super(key: key);
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({Key? key}) : super(key: key);
 
   @override
-  _ForgotPasswordScreenState createState() => _ForgotPasswordScreenState();
+  _RegisterScreenState createState() => _RegisterScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
-  Future<void> _resetPassword() async {
+  Future<void> _registerUser() async {
     final email = _emailController.text.trim();
-    final newPassword = _passwordController.text.trim();
+    final password = _passwordController.text.trim();
 
-    if (email.isEmpty || newPassword.isEmpty) {
+    if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all fields.')),
       );
@@ -28,23 +28,22 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // REPLACE 'YOUR-ACTUAL-RENDER-URL' WITH YOUR REAL RENDER DOMAIN
       final response = await http.post(
-        Uri.parse('https://YOUR-ACTUAL-RENDER-URL.onrender.com/api/auth/forgot-password'),
+        Uri.parse('https://YOUR-ACTUAL-RENDER-URL.onrender.com/api/auth/register'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'newPassword': newPassword}),
+        body: jsonEncode({'email': email, 'password': password}),
       );
 
       final data = jsonDecode(response.body);
 
-      if (response.statusCode == 200 && data['success'] == true) {
+      if (response.statusCode == 201 || response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? 'Password reset successful!')),
+          const SnackBar(content: Text('Registration successful! Please log in.')),
         );
         Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? 'Failed to reset password.')),
+          SnackBar(content: Text(data['message'] ?? 'Registration failed.')),
         );
       }
     } catch (e) {
@@ -59,7 +58,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Reset Password')),
+      appBar: AppBar(title: const Text('Create Account')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -73,17 +72,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             const SizedBox(height: 16),
             TextField(
               controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'New Password'),
+              decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _isLoading ? null : _resetPassword,
+                onPressed: _isLoading ? null : _registerUser,
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Update Password'),
+                    : const Text('Register Account'),
               ),
             ),
           ],

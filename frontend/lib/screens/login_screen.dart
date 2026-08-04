@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'forgot_password_screen.dart'; // Correct import path inside the screens folder
+import 'forgot_password_screen.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -29,9 +30,9 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Replace with your actual live Render backend URL
+      // REPLACE 'YOUR-ACTUAL-RENDER-URL' WITH YOUR REAL RENDER APP DOMAIN
       final response = await http.post(
-        Uri.parse('https://YOUR-RENDER-URL.onrender.com/api/auth/login'),
+        Uri.parse('https://YOUR-ACTUAL-RENDER-URL.onrender.com/api/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
       );
@@ -88,17 +89,30 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 12),
             
-            // Forgot Password Navigation (Fixed without 'const')
+            // Forgot Password Navigation
             TextButton(
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ForgotPasswordScreen(),
+                    builder: (context) => const ForgotPasswordScreen(),
                   ),
                 );
               },
               child: const Text('Forgot Password?'),
+            ),
+
+            // Register / Create Account Navigation
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const RegisterScreen(),
+                  ),
+                );
+              },
+              child: const Text("Don't have an account? Register"),
             ),
           ],
         ),
