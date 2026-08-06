@@ -6,15 +6,14 @@ void main() {
 }
 
 class LawFirmApp extends StatelessWidget {
-  const LawFirmApp({super.key});
+  const LawFirmApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Law Firm Management System',
+      title: 'Law Firm System',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
+        primarySwatch: Colors.purple,
       ),
       home: const LoginScreen(),
       debugShowCheckedModeBanner: false,

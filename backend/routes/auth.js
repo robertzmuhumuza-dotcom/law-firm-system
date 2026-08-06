@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User'); // Ensure your User model path is correct
+const User = require('../models/User');
 
-// 1. Register Route
+// Register Route -> /api/auth/register
 router.post('/register', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -21,7 +21,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// 2. Login Route
+// Login Route -> /api/auth/login
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -37,7 +37,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// 3. Forgot / Reset Password Route
+// Forgot / Reset Password Route -> /api/auth/forgot-password
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email, newPassword } = req.body;

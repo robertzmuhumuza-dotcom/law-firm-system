@@ -2,35 +2,29 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
-// Initialize Express app
 const app = express();
 
 // Middleware
 app.use(express.json());
 app.use(cors());
 
-// Import Authentication Routes
-const authRoutes = require('./routes/auth');
+// Database Connection (Uses Render environment variable or local fallback)
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/lawfirm';
+mongoose.connect(MONGO_URI)
+  .then(() => console.log('MongoDB connected successfully'))
+  .catch((err) => console.error('MongoDB connection error:', err));
 
-// Mount routes so they match '/api/auth/login', '/api/auth/register', and '/api/auth/forgot-password'
+// Mount Authentication Routes under /api/auth
+const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 
-// Root route test
+// Root test route to verify server status
 app.get('/', (req, res) => {
-  res.send('Law Firm System Backend is running live!');
+  res.status(200).send('Law Firm Backend Server is live and running!');
 });
 
-// Database Connection & Server Startup
+// Server Port Configuration
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || 'YOUR_MONGODB_CONNECTION_STRING';
-
-mongoose.connect(MONGO_URI)
-  .then(() => {
-    console.log('Connected to MongoDB successfully');
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error('Database connection error:', err);
-  });
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

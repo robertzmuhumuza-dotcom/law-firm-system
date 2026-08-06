@@ -28,7 +28,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // REPLACE 'YOUR-ACTUAL-RENDER-URL' WITH YOUR REAL RENDER DOMAIN
+      // Ensure your full endpoint path includes /api/auth/forgot-password
       final response = await http.post(
         Uri.parse('https://YOUR-ACTUAL-RENDER-URL.onrender.com/api/auth/forgot-password'),
         headers: {'Content-Type': 'application/json'},
@@ -39,12 +39,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
       if (response.statusCode == 200 && data['success'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? 'Password reset successful!')),
+          SnackBar(content: Text(data['message'] ?? 'Password updated successfully!')),
         );
         Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? 'Failed to reset password.')),
+          SnackBar(content: Text(data['message'] ?? 'Failed to update password.')),
         );
       }
     } catch (e) {
