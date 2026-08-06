@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../api_config.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({Key? key}) : super(key: key);
@@ -28,9 +29,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Ensure your full endpoint path includes /api/auth/forgot-password
       final response = await http.post(
-        Uri.parse('https://YOUR-ACTUAL-RENDER-URL.onrender.com/api/auth/forgot-password'),
+        Uri.parse(ApiConfig.forgotPassword),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'newPassword': newPassword}),
       );
