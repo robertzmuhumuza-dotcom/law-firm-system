@@ -1,37 +1,26 @@
 const express = require('express');
 const router = express.Router();
-const authorize = require('../middleware/authMiddleware');
-const multer = require('multer');
-const fs = require('fs');
-const pdf = require('pdf-parse');
-const { evaluateEvidence } = require('../services/aiService'); // Corrected path
+const Case = require('../models/cases'); // Adjust model path if needed
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, 'uploads/'),
-    filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+// Get all cases
+router.get('/', async (req, res) => {
+  try {
+    const caseList = await Case.find().sort({ createdAt: -1 });
+    res.status(200).json({ success: true, data: caseList });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
-const upload = multer({ storage: storage });
 
-router.post('/:id/upload', authorize(['admin', 'lawyer']), upload.single('document'), async (req, res) => {
-    try {
-        if (!req.file) return res.status(400).json({ error: "No file uploaded" });
-
-        const filePath = req.file.path;
-        
-        // Read and extract PDF text
-        let dataBuffer = fs.readFileSync(filePath);
-        const data = await pdf(dataBuffer);
-        
-        // Send extracted text to AI service
-        const aiAnalysis = await evaluateEvidence(data.text);
-        
-        res.json({ 
-            message: "File analyzed successfully", 
-            analysis: aiAnalysis 
-        });
-    } catch (err) {
-        res.status(500).json({ error: "Processing failed: " + err.message });
-    }
+// Create a new case
+router.post('/', async (req, res) => {
+  try {
+    const newCase = new Case(req.body);
+    const savedCase = await newCase.save();
+    res.status(201).json({ success: true, data: savedCase, message: 'Case created successfully!' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 module.exports = router;

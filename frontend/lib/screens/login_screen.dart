@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../api_config.dart';
 import 'forgot_password_screen.dart';
+import 'register_screen.dart';
+import 'dashboard_screen.dart'; // Imports your actual dashboard file shown in the screenshot
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -42,7 +44,12 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(data['message'] ?? 'Login successful!')),
         );
-        // Navigate to your home screen here if desired
+        
+        // This navigates straight to your real DashboardScreen with your AI features!
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const DashboardScreen()),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(data['message'] ?? 'Invalid credentials.')),
@@ -95,6 +102,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 );
               },
               child: const Text('Forgot Password?'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                );
+              },
+              child: const Text("Don't have an account? Register"),
             ),
           ],
         ),

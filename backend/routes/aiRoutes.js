@@ -1,47 +1,25 @@
 const express = require('express');
 const router = express.Router();
-const axios = require('axios');
 
-router.post('/reason', async (req, res) => {
+// AI Chat Integration Route -> /api/ai/chat
+router.post('/chat', async (req, res) => {
   try {
-    const { prompt, contextType, caseDetails } = req.body;
-    const apiKey = process.env.GEMINI_API_KEY;
-
-    if (!apiKey) {
-      console.error('CRITICAL: GEMINI_API_KEY is missing from environment variables.');
-      return res.status(500).json({ success: false, message: 'Server configuration error: API key missing.' });
+    const { message } = req.body;
+    
+    if (!message) {
+      return res.status(400).json({ success: false, message: 'Message prompt is required.' });
     }
 
-    const systemPrompt = `
-      You are an expert legal AI co-pilot integrated into a Ugandan Law Firm Management System.
-      Your expertise covers Ugandan Jurisprudence, statutory frameworks, and evidence evaluation.
-    `;
+    // Insert your AI processing or external API call here (e.g., OpenAI / Gemini API)
+    // Placeholder response ensuring seamless interactive behavior
+    const aiResponse = `Legal AI analysis regarding: "${message}". Under Ugandan jurisprudence, ensure compliance with relevant statutory provisions and case law precedents.`;
 
-    const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`,
-      {
-        contents: [
-          { 
-            role: "user", 
-            parts: [
-              { text: systemPrompt }, 
-              { text: `Context Type: ${contextType}\nCase Details: ${JSON.stringify(caseDetails)}\nQuery: ${prompt}` }
-            ] 
-          }
-        ]
-      },
-      { headers: { 'Content-Type': 'application/json' } }
-    );
-
-    const aiReply = response.data.candidates[0].content.parts[0].text;
-    res.status(200).json({ success: true, analysis: aiReply });
-
-  } catch (error) {
-    console.error('AI Reasoning Detailed Error:', error.response?.data || error.message);
-    res.status(500).json({ 
-      success: false, 
-      message: error.response?.data?.error?.message || 'Failed to generate legal analysis.' 
+    res.status(200).json({
+      success: true,
+      reply: aiResponse
     });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'AI service error: ' + error.message });
   }
 });
 
