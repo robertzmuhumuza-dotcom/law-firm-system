@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const Case = require('../models/cases'); // Adjust model path if needed
+const Case = require('../models/Case'); // Matches Case.js exactly
 
-// Get all cases
+// Get all cases -> /api/cases
 router.get('/', async (req, res) => {
   try {
     const caseList = await Case.find().sort({ createdAt: -1 });
@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Create a new case
+// Create a new case -> /api/cases
 router.post('/', async (req, res) => {
   try {
     const newCase = new Case(req.body);
