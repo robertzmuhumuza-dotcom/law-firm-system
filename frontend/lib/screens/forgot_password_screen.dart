@@ -29,22 +29,33 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     setState(() => _isLoading = true);
 
     try {
+      final url = Uri.parse(ApiConfig.forgotPassword);
+      print('Hitting URL: $url'); // Check your debug console for this
+
       final response = await http.post(
-        Uri.parse(ApiConfig.forgotPassword),
+        url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'newPassword': newPassword}),
       );
 
-      final data = jsonDecode(response.body);
+      // Check if response is JSON or an HTML error page
+      if (response.headers['content-type']?.contains('application/json') ?? false) {
+        final data = jsonDecode(response.body);
 
-      if (response.statusCode == 200 && data['success'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? 'Password updated successfully!')),
-        );
-        Navigator.pop(context);
+        if (response.statusCode == 200 && data['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(data['message'] ?? 'Password updated successfully!')),
+          );
+          Navigator.pop(context);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(data['message'] ?? 'Failed to update password.')),
+          );
+        }
       } else {
+        // Server returned HTML (like a 404 Not Found page)
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? 'Failed to update password.')),
+          SnackBar(content: Text('Server Error (404): Route not found at $url')),
         );
       }
     } catch (e) {
