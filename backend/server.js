@@ -3,7 +3,7 @@ const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY; // Set this in your Render Environment Variables
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 // Middleware
 app.use(express.json());
@@ -26,7 +26,7 @@ app.post('/chat', async (req, res) => {
     }
 
     if (!GEMINI_API_KEY) {
-      return.status(500).json({ response: 'Gemini API Key is not configured on the server environment.' });
+      return res.status(500).json({ response: 'Gemini API Key is not configured on the server environment.' });
     }
 
     // Call Google Gemini API directly using secure server-side fetch
@@ -68,7 +68,7 @@ app.post('/chat', async (req, res) => {
 // 2. CASE TRACKING ENDPOINT
 // ==========================================
 let mockCases = [
-  { id: '1', caseNumber: 'HCT-00-CC-CS-0123-2025', title: 'Kampala Distibutors v. Nile Breweries', status: 'Active Hearing' }
+  { id: '1', caseNumber: 'HCT-00-CC-CS-0123-2025', title: 'Kampala Distributors v. Nile Breweries', status: 'Active Hearing' }
 ];
 
 app.get('/cases', (req, res) => {
