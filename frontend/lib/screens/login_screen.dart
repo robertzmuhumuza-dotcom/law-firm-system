@@ -1,73 +1,80 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
-import '../api_config.dart';
-import 'forgot_password_screen.dart';
-import 'register_screen.dart';
-import 'dashboard_screen.dart'; // Imports your actual dashboard file shown in the screenshot
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
 
-  Future<void> _login() async {
+  // Replace 'your-app-name' with your actual Render service name
+  final String _loginUrl = 'https://your-app-name.onrender.com/login';
+
+  Future<void> _loginUser() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields.')),
+        const SnackBar(content: Text('Please enter both email and password')),
       );
       return;
     }
 
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
       final response = await http.post(
-        Uri.parse(ApiConfig.login),
+        Uri.parse(_loginUrl),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
       );
 
+      // Verify if the server returned JSON instead of an HTML error page (404/502)
+      final contentType = response.headers['content-type'] ?? '';
+      if (!contentType.contains('application/json')) {
+        throw Exception('Server error (${response.statusCode}): Received HTML instead of JSON. Verify backend deployment.');
+      }
+
       final data = jsonDecode(response.body);
 
-      if (response.statusCode == 200 && data['success'] == true) {
+      if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? 'Login successful!')),
-        );
-        
-        // This navigates straight to your real DashboardScreen with your AI features!
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const DashboardScreen()),
+          const SnackBar(content: Text('Login Successful!')),
         );
       } else {
+        final errorMessage = data['message'] ?? 'Login failed.';
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? 'Invalid credentials.')),
+          SnackBar(content: Text(errorMessage)),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Network error: $e')),
+        SnackBar(content: Text('Error: $e')),
       );
     } finally {
-      setState(() => _isLoading = false);
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      appBar: AppBar(
+        title: const Text('Login'),
+        backgroundColor: Colors.orange.shade800,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -75,42 +82,34 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             TextField(
               controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email Address'),
               keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(
+                labelText: 'Email Address',
+                border: OutlineInputBorder(),
+              ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(),
+              ),
             ),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
+              height: 48,
               child: ElevatedButton(
-                onPressed: _isLoading ? null : _login,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange.shade800,
+                ),
+                onPressed: _isLoading ? null : _loginUser,
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Login'),
+                    : const Text('Login', style: TextStyle(fontSize: 16, color: Colors.white)),
               ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
-                );
-              },
-              child: const Text('Forgot Password?'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const RegisterScreen()),
-                );
-              },
-              child: const Text("Don't have an account? Register"),
             ),
           ],
         ),

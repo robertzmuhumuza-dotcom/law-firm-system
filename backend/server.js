@@ -8,9 +8,33 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cors());
 
-// Health check route for browser or Render uptime checks
+// Health check route
 app.get('/', (req, res) => {
   res.status(200).send('Law Firm Management System Backend is active and running.');
+});
+
+// Login endpoint matching your Flutter application route: /login
+app.post('/login', (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required.' });
+    }
+
+    console.log(`Login attempt for email: ${email}`);
+
+    // Authentication check logic (add database validation here if needed)
+    return res.status(200).json({
+      message: 'Login successful',
+      token: 'mock-jwt-token-12345',
+      user: { email }
+    });
+
+  } catch (error) {
+    console.error('Server error on /login route:', error);
+    return res.status(500).json({ message: 'Internal server error during login.' });
+  }
 });
 
 // Chat endpoint matching your Flutter application route: /chat
@@ -22,15 +46,8 @@ app.post('/chat', async (req, res) => {
       return res.status(400).json({ error: 'Prompt field is required.' });
     }
 
-    console.log(`Received query: "${prompt}" with context: "${context}"`);
+    const aiReply = `Analysis regarding "${prompt}" under ${context || 'Ugandan jurisprudence and civil procedure'}: Preliminary statutory review indicates proper adherence to procedure.`;
 
-    // TODO: If you are connecting an external AI API (like OpenAI or Google Gemini), 
-    // call it here using your API keys. 
-
-    // Professional legal tech response tailored to your workflow
-    const aiReply = `Analysis regarding "${prompt}" under ${context || 'Ugandan jurisprudence and civil procedure'}: Preliminary statutory review indicates proper adherence to procedure. Ensure all pleadings comply with the Civil Procedure Rules.`;
-
-    // Send back the JSON response expected by your Flutter app
     return res.status(200).json({
       response: aiReply
     });
