@@ -49,8 +49,10 @@ app.post('/chat', async (req, res) => {
 
     const data = await geminiResponse.json();
     
-    // Extract text from Gemini response structure safely
-    const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Analysis complete, but no response text was returned.';
+    // Robust extraction path for Gemini v1beta response
+    const aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text || 
+                   data?.error?.message || 
+                   'Analysis complete, but no response text was returned.';
 
     return res.status(200).json({
       response: aiText
@@ -85,7 +87,9 @@ app.post('/cases', (req, res) => {
 // ==========================================
 // 3. DOCUMENT STORAGE ENDPOINT
 // ==========================================
-let mockDocuments = [];
+let mockDocuments = [
+  { id: '1', title: 'Plaint Template - Civil Suit', fileUrl: 'https://example.com/plaint', uploadedAt: '2026-08-07' }
+];
 
 app.get('/documents', (req, res) => {
   res.status(200).json(mockDocuments);
@@ -93,7 +97,7 @@ app.get('/documents', (req, res) => {
 
 app.post('/documents', (req, res) => {
   const { title, fileUrl, uploadedBy } = req.body;
-  const newDoc = { id: Date.now().toString(), title, fileUrl, uploadedAt: new Date().toISOString() };
+  const newDoc = { id: Date.now().toString(), title, fileUrl, uploadedAt: new Date().toISOString().substring(0, 10) };
   mockDocuments.push(newDoc);
   res.status(201).json({ message: 'Document stored successfully', document: newDoc });
 });
@@ -101,7 +105,9 @@ app.post('/documents', (req, res) => {
 // ==========================================
 // 4. ROLE ASSIGNMENT ENDPOINT
 // ==========================================
-let mockRoles = [];
+let mockRoles = [
+  { id: '1', userId: 'counsel@law.com', role: 'Lead Counsel', caseId: 'HCT-00-CC-CS-0123-2025' }
+];
 
 app.get('/roles', (req, res) => {
   res.status(200).json(mockRoles);
@@ -115,7 +121,7 @@ app.post('/roles', (req, res) => {
 });
 
 // ==========================================
-// AUTHENTICATION ENDPOINTS (Login / Register)
+// AUTHENTICATION ENDPOINTS
 // ==========================================
 app.post('/register', (req, res) => {
   const { email, password } = req.body;
