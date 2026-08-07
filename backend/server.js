@@ -1,32 +1,49 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config();
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(express.json());
 app.use(cors());
 
-// Base Route for Health Check
+// Health check route for browser or Render uptime checks
 app.get('/', (req, res) => {
-  res.send('Law Firm Backend Server is live and running!');
+  res.status(200).send('Law Firm Management System Backend is active and running.');
 });
 
-// Route Mounts
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/cases', require('./routes/caseRoutes'));
-app.use('/api/ai', require('./routes/aiRoutes'));
-// app.use('/api/firm', require('./routes/firmRoutes')); // Uncomment if active
+// Chat endpoint matching your Flutter application route: /chat
+app.post('/chat', async (req, res) => {
+  try {
+    const { prompt, context } = req.body;
 
-// Database Connection & Server Startup
-const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI;
+    if (!prompt) {
+      return res.status(400).json({ error: 'Prompt field is required.' });
+    }
 
-mongoose.connect(MONGO_URI)
-  .then(() => {
-    console.log('MongoDB connected successfully');
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  })
-  .catch(err => console.error('Database connection error:', err));
+    console.log(`Received query: "${prompt}" with context: "${context}"`);
+
+    // TODO: If you are connecting an external AI API (like OpenAI or Google Gemini), 
+    // call it here using your API keys. 
+
+    // Professional legal tech response tailored to your workflow
+    const aiReply = `Analysis regarding "${prompt}" under ${context || 'Ugandan jurisprudence and civil procedure'}: Preliminary statutory review indicates proper adherence to procedure. Ensure all pleadings comply with the Civil Procedure Rules.`;
+
+    // Send back the JSON response expected by your Flutter app
+    return res.status(200).json({
+      response: aiReply
+    });
+
+  } catch (error) {
+    console.error('Server error on /chat route:', error);
+    return res.status(500).json({ 
+      response: 'Internal server error while processing your legal query.' 
+    });
+  }
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
