@@ -12,7 +12,6 @@ class DocumentScreen extends StatefulWidget {
 class _DocumentScreenState extends State<DocumentScreen> {
   List<dynamic> _documents = [];
   bool _isLoading = true;
-
   final String _baseUrl = 'https://law-firm-system-mrek.onrender.com';
 
   @override
@@ -24,7 +23,6 @@ class _DocumentScreenState extends State<DocumentScreen> {
   Future<void> _fetchDocuments() async {
     try {
       final response = await http.get(Uri.parse('$_baseUrl/documents'));
-
       if (response.statusCode == 200) {
         setState(() {
           _documents = jsonDecode(response.body);
@@ -32,15 +30,9 @@ class _DocumentScreenState extends State<DocumentScreen> {
         });
       } else {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to load documents.')),
-        );
       }
     } catch (e) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Network error: $e')),
-      );
     }
   }
 
@@ -57,7 +49,7 @@ class _DocumentScreenState extends State<DocumentScreen> {
           children: [
             TextField(
               controller: titleController,
-              decoration: const InputDecoration(labelText: 'Document Title / Name'),
+              decoration: const InputDecoration(labelText: 'Document Title'),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -76,35 +68,19 @@ class _DocumentScreenState extends State<DocumentScreen> {
             onPressed: () async {
               final title = titleController.text.trim();
               final fileUrl = urlController.text.trim();
-              if (title.isEmpty || fileUrl.isEmpty) return;
+              if (title.isEmpty) return;
               Navigator.pop(context);
 
               try {
                 final response = await http.post(
                   Uri.parse('$_baseUrl/documents'),
                   headers: {'Content-Type': 'application/json'},
-                  body: jsonEncode({
-                    'title': title,
-                    'fileUrl': fileUrl,
-                    'uploadedBy': 'Counsel'
-                  }),
+                  body: jsonEncode({'title': title, 'fileUrl': fileUrl}),
                 );
-
                 if (response.statusCode == 201) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Document stored successfully!')),
-                  );
                   _fetchDocuments();
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Failed to store document.')),
-                  );
                 }
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Error uploading document reference.')),
-                );
-              }
+              } catch (_) {}
             },
             child: const Text('Save', style: TextStyle(color: Colors.white)),
           ),
@@ -134,17 +110,8 @@ class _DocumentScreenState extends State<DocumentScreen> {
                       margin: const EdgeInsets.only(bottom: 10),
                       child: ListTile(
                         leading: Icon(Icons.insert_drive_file, color: Colors.green.shade800),
-                        title: Text(
-                          doc['title'] ?? 'Untitled Document',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
+                        title: Text(doc['title'] ?? 'Untitled Document', style: const TextStyle(fontWeight: FontWeight.bold)),
                         subtitle: Text('Reference: ${doc['fileUrl'] ?? 'N/A'}'),
-                        trailing: Text(
-                          doc['uploadedAt'] != null 
-                              ? doc['uploadedAt'].toString().substring(0, 10) 
-                              : '',
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
                       ),
                     );
                   },

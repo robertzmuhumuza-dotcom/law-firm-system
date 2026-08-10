@@ -12,7 +12,6 @@ class RoleScreen extends StatefulWidget {
 class _RoleScreenState extends State<RoleScreen> {
   List<dynamic> _roles = [];
   bool _isLoading = true;
-
   final String _baseUrl = 'https://law-firm-system-mrek.onrender.com';
 
   @override
@@ -24,7 +23,6 @@ class _RoleScreenState extends State<RoleScreen> {
   Future<void> _fetchRoles() async {
     try {
       final response = await http.get(Uri.parse('$_baseUrl/roles'));
-
       if (response.statusCode == 200) {
         setState(() {
           _roles = jsonDecode(response.body);
@@ -32,15 +30,9 @@ class _RoleScreenState extends State<RoleScreen> {
         });
       } else {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to load role assignments.')),
-        );
       }
     } catch (e) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Network error: $e')),
-      );
     }
   }
 
@@ -63,12 +55,12 @@ class _RoleScreenState extends State<RoleScreen> {
             const SizedBox(height: 12),
             TextField(
               controller: roleController,
-              decoration: const InputDecoration(labelText: 'Role (e.g., Lead Counsel, Researcher)'),
+              decoration: const InputDecoration(labelText: 'Role (e.g., Lead Counsel)'),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: caseIdController,
-              decoration: const InputDecoration(labelText: 'Case ID (Optional)'),
+              decoration: const InputDecoration(labelText: 'Case ID'),
             ),
           ],
         ),
@@ -83,7 +75,6 @@ class _RoleScreenState extends State<RoleScreen> {
               final userId = userController.text.trim();
               final role = roleController.text.trim();
               final caseId = caseIdController.text.trim();
-
               if (userId.isEmpty || role.isEmpty) return;
               Navigator.pop(context);
 
@@ -91,28 +82,12 @@ class _RoleScreenState extends State<RoleScreen> {
                 final response = await http.post(
                   Uri.parse('$_baseUrl/roles'),
                   headers: {'Content-Type': 'application/json'},
-                  body: jsonEncode({
-                    'userId': userId,
-                    'role': role,
-                    'caseId': caseId.isEmpty ? 'N/A' : caseId,
-                  }),
+                  body: jsonEncode({'userId': userId, 'role': role, 'caseId': caseId}),
                 );
-
                 if (response.statusCode == 201) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Role assigned successfully!')),
-                  );
                   _fetchRoles();
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Failed to assign role.')),
-                  );
                 }
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Error connecting to backend.')),
-                );
-              }
+              } catch (_) {}
             },
             child: const Text('Assign', style: TextStyle(color: Colors.white)),
           ),
@@ -142,11 +117,8 @@ class _RoleScreenState extends State<RoleScreen> {
                       margin: const EdgeInsets.only(bottom: 10),
                       child: ListTile(
                         leading: Icon(Icons.assignment_ind, color: Colors.purple.shade800),
-                        title: Text(
-                          'User: ${item['userId'] ?? 'Unknown'}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Text('Role: ${item['role']} | Case ID: ${item['caseId']}'),
+                        title: Text('User: ${item['userId'] ?? 'Unknown'}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                        subtitle: Text('Role: ${item['role']} | Case: ${item['caseId']}'),
                       ),
                     );
                   },

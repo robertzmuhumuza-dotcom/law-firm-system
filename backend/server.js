@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
 });
 
 // ==========================================
-// 1. LIVE GEMINI AI CHAT ENDPOINT (FIXED)
+// 1. LIVE GEMINI AI CHAT ENDPOINT
 // ==========================================
 app.post('/chat', async (req, res) => {
   try {
@@ -29,9 +29,9 @@ app.post('/chat', async (req, res) => {
       return res.status(500).json({ response: 'Gemini API Key is not configured on the server environment.' });
     }
 
-    // Updated to stable v1 endpoint path for gemini-1.5-flash
+    // Using stable v1beta endpoint with gemini-1.5-flash
     const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -49,20 +49,15 @@ app.post('/chat', async (req, res) => {
 
     const data = await geminiResponse.json();
     
-    // Robust extraction path for Gemini v1 response
     const aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text || 
                    data?.error?.message || 
                    'Analysis complete, but no response text was returned.';
 
-    return res.status(200).json({
-      response: aiText
-    });
+    return res.status(200).json({ response: aiText });
 
   } catch (error) {
     console.error('Server error on /chat route:', error);
-    return res.status(500).json({ 
-      response: 'Internal server error while communicating with Gemini AI.' 
-    });
+    return res.status(500).json({ response: 'Internal server error while communicating with Gemini AI.' });
   }
 });
 
@@ -97,7 +92,7 @@ app.get('/documents', (req, res) => {
 
 app.post('/documents', (req, res) => {
   const { title, fileUrl } = req.body;
-  const newDoc = { id: Date.now().toString(), title, fileUrl, uploadedAt: new Date().toISOString().substring(0, 10) };
+  const newDoc = { id: Date.now().toString(), title, fileUrl: fileUrl || 'N/A', uploadedAt: new Date().toISOString().substring(0, 10) };
   mockDocuments.push(newDoc);
   res.status(201).json({ message: 'Document stored successfully', document: newDoc });
 });
@@ -115,7 +110,7 @@ app.get('/roles', (req, res) => {
 
 app.post('/roles', (req, res) => {
   const { userId, role, caseId } = req.body;
-  const assignment = { id: Date.now().toString(), userId, role, caseId };
+  const assignment = { id: Date.now().toString(), userId, role, caseId: caseId || 'N/A' };
   mockRoles.push(assignment);
   res.status(201).json({ message: 'Role assigned successfully', assignment });
 });
@@ -139,7 +134,6 @@ app.post('/forgot-password', (req, res) => {
   res.status(200).json({ message: 'Password reset link sent to your email.' });
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
