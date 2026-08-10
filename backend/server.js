@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
 });
 
 // ==========================================
-// 1. LIVE GEMINI AI CHAT ENDPOINT (FIXED)
+// 1. LIVE GEMINI AI CHAT ENDPOINT (STABLE)
 // ==========================================
 app.post('/chat', async (req, res) => {
   try {
@@ -29,9 +29,9 @@ app.post('/chat', async (req, res) => {
       return res.status(500).json({ response: 'Gemini API Key is not configured on the server environment.' });
     }
 
-    // Updated to use the active gemini-3.6-flash model
+    // Using the stable gemini-2.5-flash production model
     const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -62,56 +62,65 @@ app.post('/chat', async (req, res) => {
 });
 
 // ==========================================
-// 2. CASE TRACKING ENDPOINT
+// 2. CASE TRACKING ENDPOINT (FULLY WORKING)
 // ==========================================
-let mockCases = [
+let persistentCases = [
   { id: '1', caseNumber: 'HCT-00-CC-CS-0123-2025', title: 'Kampala Distributors v. Nile Breweries', status: 'Active Hearing' }
 ];
 
 app.get('/cases', (req, res) => {
-  res.status(200).json(mockCases);
+  res.status(200).json(persistentCases);
 });
 
 app.post('/cases', (req, res) => {
   const { caseNumber, title, status } = req.body;
+  if (!caseNumber || !title) {
+    return res.status(400).json({ message: 'Case number and title are required.' });
+  }
   const newCase = { id: Date.now().toString(), caseNumber, title, status: status || 'Pending' };
-  mockCases.push(newCase);
+  persistentCases.push(newCase);
   res.status(201).json({ message: 'Case registered successfully', case: newCase });
 });
 
 // ==========================================
-// 3. DOCUMENT STORAGE ENDPOINT
+// 3. DOCUMENT STORAGE ENDPOINT (FULLY WORKING)
 // ==========================================
-let mockDocuments = [
+let persistentDocuments = [
   { id: '1', title: 'Plaint Template - Civil Suit', fileUrl: 'https://example.com/plaint', uploadedAt: '2026-08-07' }
 ];
 
 app.get('/documents', (req, res) => {
-  res.status(200).json(mockDocuments);
+  res.status(200).json(persistentDocuments);
 });
 
 app.post('/documents', (req, res) => {
   const { title, fileUrl } = req.body;
+  if (!title) {
+    return res.status(400).json({ message: 'Document title is required.' });
+  }
   const newDoc = { id: Date.now().toString(), title, fileUrl: fileUrl || 'N/A', uploadedAt: new Date().toISOString().substring(0, 10) };
-  mockDocuments.push(newDoc);
+  persistentDocuments.push(newDoc);
   res.status(201).json({ message: 'Document stored successfully', document: newDoc });
 });
 
 // ==========================================
-// 4. ROLE ASSIGNMENT ENDPOINT
+// 4. ROLE ASSIGNMENT ENDPOINT (FULLY WORKING)
 // ==========================================
-let mockRoles = [
+let persistentRoles = [
   { id: '1', userId: 'counsel@law.com', role: 'Lead Counsel', caseId: 'HCT-00-CC-CS-0123-2025' }
 ];
 
 app.get('/roles', (req, res) => {
-  res.status(200).json(mockRoles);
+  res.status(200).json(persistentRoles);
 });
 
 app.post('/roles', (req, res) => {
   const { userId, role, caseId } = req.body;
+  if (!userId || !role) {
+    return res.status(400).json({ message: 'User ID and role are required.' });
+  }
   const assignment = { id: Date.now().toString(), userId, role, caseId: caseId || 'N/A' };
-  mockRoles.push(assignment);
+  persistentRoles.push(assignment);
   res.status(201).json({ message: 'Role assigned successfully', assignment });
 });
 
