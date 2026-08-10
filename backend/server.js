@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
 });
 
 // ==========================================
-// 1. LIVE GEMINI AI CHAT ENDPOINT (STABLE)
+// 1. LIVE GEMINI AI CHAT ENDPOINT (GEMINI-3.6-FLASH)
 // ==========================================
 app.post('/chat', async (req, res) => {
   try {
@@ -29,9 +29,8 @@ app.post('/chat', async (req, res) => {
       return res.status(500).json({ response: 'Gemini API Key is not configured on the server environment.' });
     }
 
-    // Using the stable gemini-2.5-flash production model
     const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -62,7 +61,7 @@ app.post('/chat', async (req, res) => {
 });
 
 // ==========================================
-// 2. CASE TRACKING ENDPOINT (FULLY WORKING)
+// 2. CASE TRACKING ENDPOINT
 // ==========================================
 let persistentCases = [
   { id: '1', caseNumber: 'HCT-00-CC-CS-0123-2025', title: 'Kampala Distributors v. Nile Breweries', status: 'Active Hearing' }
@@ -83,7 +82,7 @@ app.post('/cases', (req, res) => {
 });
 
 // ==========================================
-// 3. DOCUMENT STORAGE ENDPOINT (FULLY WORKING)
+// 3. DOCUMENT STORAGE ENDPOINT
 // ==========================================
 let persistentDocuments = [
   { id: '1', title: 'Plaint Template - Civil Suit', fileUrl: 'https://example.com/plaint', uploadedAt: '2026-08-07' }
@@ -104,7 +103,7 @@ app.post('/documents', (req, res) => {
 });
 
 // ==========================================
-// 4. ROLE ASSIGNMENT ENDPOINT (FULLY WORKING)
+// 4. ROLE ASSIGNMENT ENDPOINT
 // ==========================================
 let persistentRoles = [
   { id: '1', userId: 'counsel@law.com', role: 'Lead Counsel', caseId: 'HCT-00-CC-CS-0123-2025' }
