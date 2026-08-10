@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
 });
 
 // ==========================================
-// 1. LIVE GEMINI AI CHAT ENDPOINT
+// 1. LIVE GEMINI AI CHAT ENDPOINT (FIXED)
 // ==========================================
 app.post('/chat', async (req, res) => {
   try {
@@ -29,9 +29,9 @@ app.post('/chat', async (req, res) => {
       return res.status(500).json({ response: 'Gemini API Key is not configured on the server environment.' });
     }
 
-    // Call Google Gemini API directly using secure server-side fetch
+    // Updated to stable v1 endpoint path for gemini-1.5-flash
     const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -49,7 +49,7 @@ app.post('/chat', async (req, res) => {
 
     const data = await geminiResponse.json();
     
-    // Robust extraction path for Gemini v1beta response
+    // Robust extraction path for Gemini v1 response
     const aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text || 
                    data?.error?.message || 
                    'Analysis complete, but no response text was returned.';
@@ -96,7 +96,7 @@ app.get('/documents', (req, res) => {
 });
 
 app.post('/documents', (req, res) => {
-  const { title, fileUrl, uploadedBy } = req.body;
+  const { title, fileUrl } = req.body;
   const newDoc = { id: Date.now().toString(), title, fileUrl, uploadedAt: new Date().toISOString().substring(0, 10) };
   mockDocuments.push(newDoc);
   res.status(201).json({ message: 'Document stored successfully', document: newDoc });
