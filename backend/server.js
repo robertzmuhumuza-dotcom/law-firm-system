@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
 });
 
 // ==========================================
-// 1. LIVE GEMINI AI CHAT ENDPOINT
+// 1. LIVE GEMINI AI CHAT ENDPOINT (UPDATED)
 // ==========================================
 app.post('/chat', async (req, res) => {
   try {
@@ -29,9 +29,9 @@ app.post('/chat', async (req, res) => {
       return res.status(500).json({ response: 'Gemini API Key is not configured on the server environment.' });
     }
 
-    // Using stable v1beta endpoint with gemini-1.5-flash
+    // Updated to use the active gemini-2.5-flash model
     const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
