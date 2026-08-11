@@ -102,7 +102,7 @@ app.post('/chat', async (req, res) => {
 });
 
 // ==========================================
-// 2. CASE TRACKING ENDPOINTS (Persistent)
+// 2. CASE TRACKING ENDPOINTS
 // ==========================================
 app.get('/cases', async (req, res) => {
   try {
@@ -128,7 +128,7 @@ app.post('/cases', async (req, res) => {
 });
 
 // ==========================================
-// 3. DOCUMENT STORAGE ENDPOINTS (Persistent)
+// 3. DOCUMENT STORAGE ENDPOINTS
 // ==========================================
 app.get('/documents', async (req, res) => {
   try {
@@ -153,8 +153,21 @@ app.post('/documents', async (req, res) => {
   }
 });
 
+app.delete('/documents/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedDoc = await Document.findByIdAndDelete(id);
+    if (!deletedDoc) {
+      return res.status(404).json({ message: 'Document not found.' });
+    }
+    res.status(200).json({ message: 'Document deleted successfully.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error deleting document' });
+  }
+});
+
 // ==========================================
-// 4. ROLE ASSIGNMENT ENDPOINTS (Persistent)
+// 4. ROLE ASSIGNMENT ENDPOINTS
 // ==========================================
 app.get('/roles', async (req, res) => {
   try {
@@ -180,7 +193,7 @@ app.post('/roles', async (req, res) => {
 });
 
 // ==========================================
-// 5. SECURE AUTHENTICATION ENDPOINTS
+// 5. AUTHENTICATION ENDPOINTS
 // ==========================================
 app.post('/register', async (req, res) => {
   try {
@@ -213,13 +226,11 @@ app.post('/login', async (req, res) => {
     const user = await User.findOne({ email: cleanEmail });
     
     if (!user) {
-      console.log(`Login failed: User not found for email: ${cleanEmail}`);
       return res.status(400).json({ message: 'Invalid email or password.' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      console.log(`Login failed: Password mismatch for email: ${cleanEmail}`);
       return res.status(400).json({ message: 'Invalid email or password.' });
     }
 
