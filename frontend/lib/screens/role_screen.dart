@@ -1,43 +1,43 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class RoleScreen extends StatefulWidget {
   const RoleScreen({Key? key}) : super(key: key);
 
   @override
-  State<RoleScreen> createState() => _RoleScreenState();
+  _RoleScreenState createState() => _RoleScreenState();
 }
 
 class _RoleScreenState extends State<RoleScreen> {
-  List<dynamic> _roles = [];
-  bool _isLoading = true;
+  List roles = [];
+  bool isLoading = true;
   final String _baseUrl = 'https://law-firm-system-mrek.onrender.com';
 
   @override
   void initState() {
     super.initState();
-    _fetchRoles();
+    fetchRoles();
   }
 
-  Future<void> _fetchRoles() async {
+  Future<void> fetchRoles() async {
     try {
       final response = await http.get(Uri.parse('$_baseUrl/roles'));
       if (response.statusCode == 200) {
         setState(() {
-          _roles = jsonDecode(response.body);
-          _isLoading = false;
+          roles = json.decode(response.body);
+          isLoading = false;
         });
       } else {
-        setState(() => _isLoading = false);
+        setState(() => isLoading = false);
       }
     } catch (e) {
-      setState(() => _isLoading = false);
+      setState(() => isLoading = false);
     }
   }
 
-  void _showAssignRoleDialog() {
-    final userController = TextEditingController();
+  void _showAddRoleDialog() {
+    final emailController = TextEditingController();
     final roleController = TextEditingController();
     final caseIdController = TextEditingController();
 
@@ -48,48 +48,30 @@ class _RoleScreenState extends State<RoleScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(
-              controller: userController,
-              decoration: const InputDecoration(labelText: 'User Email / ID'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: roleController,
-              decoration: const InputDecoration(labelText: 'Role (e.g., Lead Counsel)'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: caseIdController,
-              decoration: const InputDecoration(labelText: 'Case ID'),
-            ),
+            TextField(controller: emailController, decoration: const InputDecoration(labelText: 'User Email / ID')),
+            TextField(controller: roleController, decoration: const InputDecoration(labelText: 'Role (e.g. Lead Counsel)')),
+            TextField(controller: caseIdController, decoration: const InputDecoration(labelText: 'Case ID')),
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple.shade800),
             onPressed: () async {
-              final userId = userController.text.trim();
-              final role = roleController.text.trim();
-              final caseId = caseIdController.text.trim();
-              if (userId.isEmpty || role.isEmpty) return;
-              Navigator.pop(context);
-
-              try {
-                final response = await http.post(
+              if (emailController.text.isNotEmpty && roleController.text.isNotEmpty) {
+                await http.post(
                   Uri.parse('$_baseUrl/roles'),
                   headers: {'Content-Type': 'application/json'},
-                  body: jsonEncode({'userId': userId, 'role': role, 'caseId': caseId}),
+                  body: json.encode({
+                    'userId': emailController.text,
+                    'role': roleController.text,
+                    'caseId': caseIdController.text,
+                  }),
                 );
-                if (response.statusCode == 201) {
-                  _fetchRoles();
-                }
-              } catch (_) {}
+                Navigator.pop(context);
+                fetchRoles();
+              }
             },
-            child: const Text('Assign', style: TextStyle(color: Colors.white)),
+            child: const Text('Assign'),
           ),
         ],
       ),
@@ -99,34 +81,30 @@ class _RoleScreenState extends State<RoleScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Role Assignment Management'),
-        backgroundColor: Colors.purple.shade800,
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.purple))
-          : _roles.isEmpty
+      appBar: AppBar(title: const Text('Role Assignments'), backgroundColor: Colors.purple.shade800),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : roles.isEmpty
               ? const Center(child: Text('No role assignments recorded yet.'))
               : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _roles.length,
+                  itemCount: roles.length,
                   itemBuilder: (context, index) {
-                    final item = _roles[index];
+                    final r = roles[index];
                     return Card(
-                      elevation: 2,
-                      margin: const EdgeInsets.only(bottom: 10),
+                      margin: const EdgeInsets.all(10),
                       child: ListTile(
-                        leading: Icon(Icons.assignment_ind, color: Colors.purple.shade800),
-                        title: Text('User: ${item['userId'] ?? 'Unknown'}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text('Role: ${item['role']} | Case: ${item['caseId']}'),
+                        leading: const Icon(Icons.supervised_user_circle, color: Colors.purple),
+                        title: Text(r['role'] ?? ''),
+                        subtitle: Text('User: ${r['userId']}\nCase: ${r['caseId']}'),
+                        isThreeLine: true,
                       ),
                     );
                   },
                 ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.purple.shade800,
-        onPressed: _showAssignRoleDialog,
-        child: const Icon(Icons.add, color: Colors.white),
+        onPressed: _showAddRoleDialog,
+        child: const Icon(Icons.person_add, color: Colors.white),
       ),
     );
   }

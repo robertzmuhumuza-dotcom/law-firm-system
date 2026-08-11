@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'case_tracking_screen.dart';
+import 'document_screen.dart';
+import 'role_screen.dart';
 import 'ai_chat_screen.dart';
-import 'case_list_screen.dart';
-import 'login_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -15,10 +16,7 @@ class DashboardScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-              );
+              Navigator.pop(context);
             },
           ),
         ],
@@ -37,56 +35,69 @@ class DashboardScreen extends StatelessWidget {
               'Select a module below to manage your firm\'s workflow:',
               style: TextStyle(color: Colors.grey),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             Expanded(
               child: GridView.count(
                 crossAxisCount: 2,
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
                 children: [
-                  // Case Tracking Module
+                  // 1. CASE TRACKING MODULE
                   _DashboardCard(
                     title: 'Case Tracking',
                     icon: Icons.folder,
-                    color: Colors.blue,
+                    iconColor: Colors.blue,
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => CaseListScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const CaseTrackingScreen(),
+                        ),
                       );
                     },
                   ),
-                  // AI & Evidence Co-pilot Module
+
+                  // 2. AI & EVIDENCE MODULE
                   _DashboardCard(
                     title: 'AI & Evidence',
                     icon: Icons.smart_toy,
-                    color: Colors.orange,
+                    iconColor: Colors.orange,
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const AIChatScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const AiChatScreen(),
+                        ),
                       );
                     },
                   ),
-                  // Document Storage Module
+
+                  // 3. DOCUMENT STORAGE MODULE
                   _DashboardCard(
                     title: 'Document Storage',
                     icon: Icons.description,
-                    color: Colors.green,
+                    iconColor: Colors.green,
                     onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Document Storage connected to database.')),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const DocumentScreen(),
+                        ),
                       );
                     },
                   ),
-                  // Role Assignments Module
+
+                  // 4. ROLE ASSIGNMENTS MODULE
                   _DashboardCard(
                     title: 'Role Assignments',
-                    icon: Icons.people,
-                    color: Colors.purple,
+                    icon: Icons.supervised_user_circle,
+                    iconColor: Colors.purple,
                     onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Role Assignments active.')),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const RoleScreen(),
+                        ),
                       );
                     },
                   ),
@@ -103,20 +114,20 @@ class DashboardScreen extends StatelessWidget {
 class _DashboardCard extends StatelessWidget {
   final String title;
   final IconData icon;
-  final Color color;
+  final Color iconColor;
   final VoidCallback onTap;
 
   const _DashboardCard({
     required this.title,
     required this.icon,
-    required this.color,
+    required this.iconColor,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 4,
+      elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: onTap,
@@ -126,12 +137,15 @@ class _DashboardCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 48, color: color),
-              const SizedBox(height: 12),
+              Icon(icon, size: 48, color: iconColor),
+              const SizedBox(height: 16),
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
