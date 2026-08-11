@@ -180,24 +180,26 @@ app.post('/roles', async (req, res) => {
 });
 
 // ==========================================
-// 5. SECURE AUTHENTICATION ENDPOINTS
+// 5. SECURE AUTHENTICATION ENDPOINTS (Robust)
 // ==========================================
 app.post('/register', async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ message: 'Email and password required.' });
 
-    const existingUser = await User.findOne({ email });
+    const cleanEmail = email.trim().toLowerCase();
+    const existingUser = await User.findOne({ email: cleanEmail });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists.' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ email, password: hashedPassword });
+    const newUser = new User({ email: cleanEmail, password: hashedPassword });
     await newUser.save();
 
-    res.status(201).json({ message: 'Account created successfully.', user: { email } });
+    res.status(201).json({ message: 'Account created successfully.', user: { email: cleanEmail } });
   } catch (err) {
+    console.error('Registration error:', err);
     res.status(500).json({ message: 'Error registering user' });
   }
 });
@@ -207,19 +209,24 @@ app.post('/login', async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ message: 'Email and password required.' });
 
-    const user = await User.findOne({ email });
+    const cleanEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: cleanEmail });
+    
     if (!user) {
+      console.log(`Login failed: User not found for email: ${cleanEmail}`);
       return res.status(400).json({ message: 'Invalid email or password.' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      console.log(`Login failed: Password mismatch for email: ${cleanEmail}`);
       return res.status(400).json({ message: 'Invalid email or password.' });
     }
 
     const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
     res.status(200).json({ message: 'Login successful', token, user: { email: user.email } });
   } catch (err) {
+    console.error('Login error:', err);
     res.status(500).json({ message: 'Error logging in' });
   }
 });
