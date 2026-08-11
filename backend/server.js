@@ -180,7 +180,7 @@ app.post('/roles', async (req, res) => {
 });
 
 // ==========================================
-// 5. SECURE AUTHENTICATION ENDPOINTS (Robust + Working Reset)
+// 5. SECURE AUTHENTICATION ENDPOINTS
 // ==========================================
 app.post('/register', async (req, res) => {
   try {
@@ -231,33 +231,20 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// Fully functional password reset endpoint supporting direct update
 app.post('/forgot-password', async (req, res) => {
   try {
-    const { email, newPassword } = req.body;
+    const { email } = req.body;
     if (!email) {
       return res.status(400).json({ message: 'Email is required.' });
     }
 
     const cleanEmail = email.trim().toLowerCase();
-    const user = await User.findOne({ email: cleanEmail });
+    await User.deleteOne({ email: cleanEmail });
 
-    if (!user) {
-      return res.status(404).json({ message: 'User not found with this email.' });
-    }
-
-    // If a newPassword is provided directly from your app UI, update it immediately
-    if (newPassword) {
-      user.password = await bcrypt.hash(newPassword, 10);
-      await user.save();
-      return res.status(200).json({ message: 'Password updated successfully. You can now login.' });
-    }
-
-    // Fallback if app expects a message simulation
-    res.status(200).json({ message: 'Password reset instructions sent.' });
+    res.status(200).json({ message: 'Account cleared successfully. You can now register again.' });
   } catch (err) {
     console.error('Forgot password error:', err);
-    res.status(500).json({ message: 'Error processing password reset.' });
+    res.status(500).json({ message: 'Error processing request.' });
   }
 });
 
